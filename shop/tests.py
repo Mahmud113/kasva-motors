@@ -37,3 +37,4 @@ class StorefrontTests(TestCase):
         response = self.client.get(reverse("shop:contact"))
         self.assertEqual(reverse("shop:contact"), "/elaqe/")
         self.assertContains(response, "050 205 48 48")
+        self.assertContains(response, "40.3904259")
