@@ -18,6 +18,14 @@ export SECRET_KEY='uzun-ve-tesadufi-gizli-acar'
 export DATABASE_URL='postgresql://istifadeci:sifre@host:5432/postgres'
 ```
 
+Alternativ olaraq layihə qovluğunda `.env.local` (və ya `env.local`) faylı yaradın. Tətbiq bu faylı lokal mühitdə avtomatik oxuyur; Vercel-in environment variables dəyərlərini əvəz etmir:
+
+```env
+SECRET_KEY="uzun-ve-tesadufi-gizli-acar"
+DATABASE_URL="postgresql://istifadeci:sifre@host:5432/postgres"
+DEBUG=False
+```
+
 `DATABASE_URL` verilməzsə, tətbiq yalnız lokal yoxlama üçün `db.sqlite3` istifadə edir.
 
 ## 3. Cədvəlləri yaratmaq və admin

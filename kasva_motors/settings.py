@@ -4,6 +4,25 @@ from pathlib import Path
 import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def load_local_environment():
+    """Lokalda .env.local/env.local dəyərlərini oxu, Vercel dəyərlərini əvəz etmə."""
+    for filename in (".env.local", "env.local"):
+        env_file = BASE_DIR / filename
+        if not env_file.exists():
+            continue
+        for raw_line in env_file.read_text(encoding="utf-8").splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.removeprefix("export ").split("=", 1)
+            key, value = key.strip(), value.strip().strip('"').strip("'")
+            if key:
+                os.environ.setdefault(key, value)
+
+
+load_local_environment()
 SECRET_KEY = os.environ.get("SECRET_KEY", "yalniz-lokal-istifade-ucun-deyisin")
 DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
 ALLOWED_HOSTS = [host for host in os.environ.get("ALLOWED_HOSTS", ".vercel.app,localhost,127.0.0.1").split(",") if host]
