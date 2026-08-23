@@ -63,7 +63,7 @@ vercel
 vercel --prod
 ```
 
-İlk `vercel` sorğularında mövcud qovluğu layihə kimi təsdiqləyin. `vercel.json` Python WSGI giriş nöqtəsini və `build_files.sh` statik faylların hazırlanmasını avtomatik istifadə edir.
+İlk `vercel` sorğularında mövcud qovluğu layihə kimi təsdiqləyin. Vercel `manage.py` faylını tanıyır, Django WSGI tətbiqini avtomatik işə salır və statik faylları CDN üzərindən təqdim edir. Bu səbəbdən `vercel.json`-də köhnə `builds` və ya catch-all `routes` qaydaları əlavə etməyin.
 
 ### GitHub inteqrasiyası ilə
 
