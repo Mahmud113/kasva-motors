@@ -35,4 +35,5 @@ class StorefrontTests(TestCase):
 
     def test_contact_page_shows_phone(self):
         response = self.client.get(reverse("shop:contact"))
+        self.assertEqual(reverse("shop:contact"), "/elaqe/")
         self.assertContains(response, "050 205 48 48")
