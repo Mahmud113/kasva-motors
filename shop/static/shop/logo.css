@@ -1,0 +1,24 @@
+.brand {
+  align-items: center;
+  display: flex;
+  flex: 0 0 235px;
+}
+
+.brand img {
+  display: block;
+  height: auto;
+  max-height: 58px;
+  object-fit: contain;
+  object-position: left center;
+  width: 100%;
+}
+
+@media (max-width: 800px) {
+  .brand { flex-basis: 185px; }
+  .brand img { max-height: 48px; }
+}
+
+@media (max-width: 480px) {
+  .brand { flex-basis: 155px; }
+  .brand img { max-height: 40px; }
+}

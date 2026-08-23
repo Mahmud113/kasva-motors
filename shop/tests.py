@@ -18,6 +18,7 @@ class StorefrontTests(TestCase):
         self.assertContains(response, "Kasva Motors")
         self.assertContains(response, "Yağ filtri")
         self.assertContains(response, "Səbətə əlavə et")
+        self.assertContains(response, "shop/images/kasva-motors-logo.png")
 
     def test_cart_can_add_product(self):
         response = self.client.post(reverse("shop:cart_add", args=[self.product.id]))
