@@ -21,6 +21,19 @@ class Product(models.Model):
     def __str__(self): return f"{self.name} ({self.part_number})"
 
 
+class StoreProfile(models.Model):
+    """Business details kept alongside Django's built-in user model."""
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="store_profile", verbose_name="İstifadəçi")
+    address = models.TextField("Ünvan", blank=True)
+
+    class Meta:
+        verbose_name = "Mağaza məlumatı"
+        verbose_name_plural = "Mağaza məlumatları"
+
+    def __str__(self):
+        return self.user.get_full_name() or self.user.username
+
+
 class Order(models.Model):
     class Status(models.TextChoices):
         PENDING = "pending", "Gözləmədə"

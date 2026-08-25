@@ -48,7 +48,9 @@ TEMPLATES = [{
     ]},
 }]
 WSGI_APPLICATION = "kasva_motors.wsgi.application"
-DATABASES = {"default": dj_database_url.config(default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}", conn_max_age=600, conn_health_checks=True)}
+# Serverless functions can be resumed with a database connection that the
+# provider has already closed. Open a fresh connection for each request.
+DATABASES = {"default": dj_database_url.config(default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}", conn_max_age=0, conn_health_checks=True)}
 AUTH_PASSWORD_VALIDATORS = []
 LANGUAGE_CODE = "az"
 LANGUAGES = [("az", "Azərbaycanca")]

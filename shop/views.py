@@ -30,10 +30,23 @@ def product_list(request):
 
 def cart_items(request):
     cart = request.session.get("cart", {})
-    products = Product.objects.filter(id__in=cart, is_available=True)
+    if not isinstance(cart, dict):
+        request.session.pop("cart", None)
+        return [], Decimal("0")
+    product_ids = []
+    quantities = {}
+    for product_id, quantity in cart.items():
+        try:
+            product_id, quantity = int(product_id), int(quantity)
+        except (TypeError, ValueError):
+            continue
+        if product_id > 0 and quantity > 0:
+            product_ids.append(product_id)
+            quantities[product_id] = min(quantity, 99)
+    products = Product.objects.filter(id__in=product_ids, is_available=True)
     items, total = [], Decimal("0")
     for product in products:
-        quantity = int(cart[str(product.id)])
+        quantity = quantities[product.id]
         subtotal = product.price * quantity
         items.append({"product": product, "quantity": quantity, "subtotal": subtotal})
         total += subtotal
@@ -45,6 +58,8 @@ def cart_add(request, product_id):
     if request.method != "POST": return redirect("shop:product_list")
     product = get_object_or_404(Product, pk=product_id, is_available=True)
     cart = request.session.get("cart", {})
+    if not isinstance(cart, dict):
+        cart = {}
     key = str(product.id)
     try:
         quantity = int(request.POST.get("quantity", 1))
@@ -60,8 +75,13 @@ def cart_add(request, product_id):
 def cart_update(request, product_id):
     if request.method == "POST":
         cart = request.session.get("cart", {})
+        if not isinstance(cart, dict):
+            cart = {}
         key = str(product_id)
-        quantity = int(request.POST.get("quantity", 0))
+        try:
+            quantity = int(request.POST.get("quantity", 0))
+        except (TypeError, ValueError):
+            quantity = 0
         if quantity > 0: cart[key] = min(quantity, 99)
         else: cart.pop(key, None)
         request.session["cart"] = cart

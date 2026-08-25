@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.urls import reverse
 
-from .models import Product
+from .models import Product, StoreProfile
 
 
 class StorefrontTests(TestCase):
@@ -37,6 +37,10 @@ class StorefrontTests(TestCase):
     def test_groups_are_not_registered_in_the_admin(self):
         self.assertNotIn(Group, admin.site._registry)
 
+    def test_store_address_is_saved_with_the_user_profile(self):
+        profile = StoreProfile.objects.create(user=self.user, address="Bakı şəhəri, Nərimanov rayonu")
+        self.assertEqual(profile.user.store_profile.address, "Bakı şəhəri, Nərimanov rayonu")
+
     def test_cart_can_add_product(self):
         self.client.force_login(self.user)
         response = self.client.post(reverse("shop:cart_add", args=[self.product.id]))
@@ -57,6 +61,19 @@ class StorefrontTests(TestCase):
     def test_login_is_required_to_add_to_cart(self):
         response = self.client.post(reverse("shop:cart_add", args=[self.product.id]))
         self.assertRedirects(response, f"{reverse('shop:login')}?next={reverse('shop:cart_add', args=[self.product.id])}")
+
+    def test_malformed_basket_session_does_not_cause_a_server_error(self):
+        self.client.force_login(self.user)
+        session = self.client.session
+        session["cart"] = {"invalid": "wrong", str(self.product.id): "2"}
+        session.save()
+        response = self.client.get(reverse("shop:cart_detail"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Yağ filtri")
+        session["cart"] = "invalid"
+        session.save()
+        response = self.client.post(reverse("shop:cart_add", args=[self.product.id]))
+        self.assertEqual(response.status_code, 302)
 
     def test_profile_shows_users_order_history(self):
         self.client.force_login(self.user)

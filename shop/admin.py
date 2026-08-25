@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group, User
-from .models import Order, OrderItem, Product
+from .models import Order, OrderItem, Product, StoreProfile
 
 # Django-nun hazır istifadəçi idarəetmə səhifəsini saxlayırıq, sadəcə admin
 # menyusundakı ingiliscə başlıqları Azərbaycan dilində göstəririk.
@@ -28,6 +28,26 @@ class StoreUserAdmin(UserAdmin):
         ("Şəxsi məlumatlar", {"fields": ("first_name", "last_name", "email")}),
         ("Hesab statusu", {"fields": ("is_active", "is_staff")}),
     )
+
+    list_display = ("username", "first_name", "last_name", "email", "store_address", "is_active", "is_staff")
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("store_profile")
+
+    @admin.display(description="Ünvan")
+    def store_address(self, obj):
+        return getattr(obj.store_profile, "address", "")
+
+
+class StoreProfileInline(admin.StackedInline):
+    model = StoreProfile
+    extra = 1
+    max_num = 1
+    can_delete = False
+    fields = ("address",)
+
+
+StoreUserAdmin.inlines = (StoreProfileInline,)
 
 
 @admin.register(Product)
