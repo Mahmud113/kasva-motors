@@ -21,6 +21,8 @@ class StorefrontTests(TestCase):
         self.assertContains(response, "Yağ filtri")
         self.assertContains(response, "Səbətə əlavə et")
         self.assertContains(response, "shop/images/kasva-motors-logo.png")
+        self.assertContains(response, "product-search-data")
+        self.assertContains(response, "shop/search.js")
 
     def test_cart_can_add_product(self):
         self.client.force_login(self.user)

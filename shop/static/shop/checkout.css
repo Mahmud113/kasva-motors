@@ -1,0 +1,9 @@
+/* Checkout sahələri: telefon və çatdırılma seçimləri. */
+.checkout-form .form-field { display: block; margin: 15px 0; font-weight: bold; }
+.checkout-form .form-field input { display: block; width: 100%; margin-top: 7px; padding: 11px; border-radius: 6px; }
+.delivery-options { margin: 22px 0; padding: 0; border: 0; }
+.delivery-options legend { margin-bottom: 12px; font-weight: bold; }
+.delivery-options > div { display: grid; gap: 10px; }
+.delivery-options label { display: flex; align-items: center; gap: 10px; margin: 0; padding: 13px 15px; border: 1px solid var(--line); border-radius: 8px; background: #fff; font-size: 14px; font-weight: 600; cursor: pointer; transition: border-color .15s, background .15s; }
+.delivery-options label:hover { border-color: var(--orange); background: #fff8f5; }
+.delivery-options input { display: block; width: 18px; height: 18px; margin: 0; padding: 0; accent-color: var(--orange); }

@@ -1,0 +1,10 @@
+.search { position: relative; }
+.search-suggestions { position: absolute; top: calc(100% + 7px); left: 0; right: 0; z-index: 10; max-height: 360px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; box-shadow: 0 10px 25px rgba(20, 32, 42, .16); }
+.search-suggestion { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.search-suggestion:last-child { border-bottom: 0; }
+.search-suggestion:hover, .search-suggestion:focus { background: #fff8f5; outline: 0; }
+.search-suggestion strong, .search-suggestion small { display: block; }
+.search-suggestion small { margin-top: 3px; }
+.search-suggestion em { flex: 0 0 auto; color: var(--green); font-size: 12px; font-style: normal; font-weight: bold; }
+.search-suggestion em.off { color: #c63e12; }
+.search-empty { padding: 14px; color: var(--muted); font-size: 13px; }

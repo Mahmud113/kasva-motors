@@ -27,14 +27,11 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ("id", "customer", "phone_number", "delivery_method", "total_price", "payment_details", "status", "created_at")
+    list_display = ("id", "customer", "phone_number", "delivery_method", "total_price", "payment_status", "status", "created_at")
     list_filter = ("delivery_method", "payment_status", "status", "created_at")
     search_fields = ("customer__username", "customer__first_name", "customer__last_name", "phone_number")
-    list_editable = ("status",)
+    list_editable = ("payment_status", "status")
     readonly_fields = ("customer", "phone_number", "delivery_method", "total_price", "created_at")
     inlines = (OrderItemInline,)
     @admin.display(description="Mağaza istifadəçisi", ordering="customer__username")
     def customer(self, obj): return (obj.customer.get_full_name() or obj.customer.username) if obj.customer else "Təyin edilməyib"
-
-    @admin.display(description="Ödəniş", ordering="payment_status")
-    def payment_details(self, obj): return f"Nağd — {obj.get_payment_status_display()}"
