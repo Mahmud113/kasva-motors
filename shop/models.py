@@ -40,7 +40,7 @@ class Order(models.Model):
     # Köhnə sifariş qeydlərini qorumaq üçün saxlanılır; yeni sifarişlər istifadəçi hesabına bağlanır.
     first_name = models.CharField("Ad", max_length=80, blank=True)
     last_name = models.CharField("Soyad", max_length=80, blank=True)
-    phone_number = models.CharField("Telefon nömrəsi", max_length=30)
+    phone_number = models.CharField("Telefon nömrəsi", max_length=30, blank=True)
     delivery_method = models.CharField("Çatdırılma üsulu", max_length=20, choices=DeliveryMethod.choices, default=DeliveryMethod.PICKUP)
     payment_status = models.CharField("Ödəniş statusu", max_length=10, choices=PaymentStatus.choices, default=PaymentStatus.UNPAID)
     total_price = models.DecimalField("Ümumi məbləğ", max_digits=10, decimal_places=2)

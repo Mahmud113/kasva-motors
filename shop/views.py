@@ -71,15 +71,11 @@ def cart_update(request, product_id):
 @login_required
 def cart_detail(request):
     items, total = cart_items(request)
-    return render(request, "shop/cart.html", {"items": items, "total": total})
-
-
-@login_required
-def checkout(request):
-    items, total = cart_items(request)
     if not items:
-        messages.error(request, "Səbətiniz boşdur.")
-        return redirect("shop:product_list")
+        if request.method == "POST":
+            messages.error(request, "Səbətiniz boşdur.")
+            return redirect("shop:product_list")
+        return render(request, "shop/cart.html", {"items": items, "total": total})
     form = CheckoutForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
@@ -91,7 +87,7 @@ def checkout(request):
         request.session.pop("cart", None)
         messages.success(request, "Sifarişiniz qəbul edildi. Tezliklə sizinlə əlaqə saxlayacağıq.")
         return redirect("shop:product_list")
-    return render(request, "shop/checkout.html", {"items": items, "total": total, "form": form})
+    return render(request, "shop/cart.html", {"items": items, "total": total, "form": form})
 
 
 @login_required

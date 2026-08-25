@@ -2,6 +2,8 @@ from decimal import Decimal
 
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.contrib import admin
+from django.contrib.auth.models import Group
 from django.urls import reverse
 
 from .models import Product
@@ -24,18 +26,27 @@ class StorefrontTests(TestCase):
         self.assertContains(response, "product-search-data")
         self.assertContains(response, "shop/search.js")
 
+    def test_product_image_button_only_appears_when_an_image_exists(self):
+        response = self.client.get(reverse("shop:product_list"))
+        self.assertNotContains(response, "data-product-image")
+        self.product.image_url = "https://example.com/product.jpg"
+        self.product.save()
+        response = self.client.get(reverse("shop:product_list"))
+        self.assertContains(response, "data-product-image")
+
+    def test_groups_are_not_registered_in_the_admin(self):
+        self.assertNotIn(Group, admin.site._registry)
+
     def test_cart_can_add_product(self):
         self.client.force_login(self.user)
         response = self.client.post(reverse("shop:cart_add", args=[self.product.id]))
         self.assertRedirects(response, reverse("shop:cart_detail"))
         self.assertContains(self.client.get(reverse("shop:cart_detail")), "Yağ filtri")
 
-    def test_checkout_creates_order_and_clears_cart(self):
+    def test_basket_confirmation_creates_order_and_clears_cart(self):
         self.client.force_login(self.user)
         self.client.post(reverse("shop:cart_add", args=[self.product.id]))
-        response = self.client.post(reverse("shop:checkout"), {
-            "phone_number": "050 205 48 48", "delivery_method": "pickup",
-        }, follow=True)
+        response = self.client.post(reverse("shop:cart_detail"), {"delivery_method": "pickup"}, follow=True)
         self.assertContains(response, "Sifarişiniz qəbul edildi")
         self.assertEqual(self.product.orderitem_set.count(), 1)
         self.assertNotIn("cart", self.client.session)
@@ -50,7 +61,7 @@ class StorefrontTests(TestCase):
     def test_profile_shows_users_order_history(self):
         self.client.force_login(self.user)
         self.client.post(reverse("shop:cart_add", args=[self.product.id]))
-        self.client.post(reverse("shop:checkout"), {"phone_number": "050 205 48 48", "delivery_method": "free_delivery"})
+        self.client.post(reverse("shop:cart_detail"), {"delivery_method": "free_delivery"})
         response = self.client.get(reverse("shop:profile"))
         self.assertContains(response, "Sifariş tarixçəsi")
         self.assertContains(response, "Pulsuz 1-2 günə çatdırılma")
@@ -58,6 +69,6 @@ class StorefrontTests(TestCase):
     def test_contact_page_shows_phone(self):
         response = self.client.get(reverse("shop:contact"))
         self.assertEqual(reverse("shop:contact"), "/elaqe/")
-        self.assertContains(response, "050 205 48 48")
-        self.assertContains(response, "099 205 48 48")
+        self.assertContains(response, "+994 55 205 48 48")
+        self.assertContains(response, "+994 99 205 48 48")
         self.assertContains(response, "40.3904259")

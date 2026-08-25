@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group, User
 from .models import Order, OrderItem, Product
 
@@ -8,6 +9,25 @@ User._meta.verbose_name = "İstifadəçi"
 User._meta.verbose_name_plural = "İstifadəçilər"
 Group._meta.verbose_name = "Qrup"
 Group._meta.verbose_name_plural = "Qruplar"
+
+# The supplier has no need for user-managed groups or per-user permissions.
+admin.site.unregister(Group)
+admin.site.unregister(User)
+
+
+@admin.register(User)
+class StoreUserAdmin(UserAdmin):
+    fieldsets = (
+        (None, {"fields": ("username", "password")}),
+        ("Şəxsi məlumatlar", {"fields": ("first_name", "last_name", "email")}),
+        ("Hesab statusu", {"fields": ("is_active", "is_staff", "is_superuser")}),
+        ("Vacib tarixlər", {"fields": ("last_login", "date_joined")}),
+    )
+    add_fieldsets = (
+        (None, {"classes": ("wide",), "fields": ("username", "password1", "password2")}),
+        ("Şəxsi məlumatlar", {"fields": ("first_name", "last_name", "email")}),
+        ("Hesab statusu", {"fields": ("is_active", "is_staff")}),
+    )
 
 
 @admin.register(Product)
