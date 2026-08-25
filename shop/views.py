@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
@@ -39,17 +40,23 @@ def cart_items(request):
     return items, total
 
 
+@login_required
 def cart_add(request, product_id):
     if request.method != "POST": return redirect("shop:product_list")
     product = get_object_or_404(Product, pk=product_id, is_available=True)
     cart = request.session.get("cart", {})
     key = str(product.id)
-    cart[key] = min(int(cart.get(key, 0)) + 1, 99)
+    try:
+        quantity = int(request.POST.get("quantity", 1))
+    except (TypeError, ValueError):
+        quantity = 1
+    cart[key] = min(int(cart.get(key, 0)) + max(quantity, 1), 99)
     request.session["cart"] = cart
     messages.success(request, f"{product.name} səbətə əlavə edildi.")
     return redirect(request.POST.get("next") or "shop:cart_detail")
 
 
+@login_required
 def cart_update(request, product_id):
     if request.method == "POST":
         cart = request.session.get("cart", {})
@@ -61,11 +68,13 @@ def cart_update(request, product_id):
     return redirect("shop:cart_detail")
 
 
+@login_required
 def cart_detail(request):
     items, total = cart_items(request)
     return render(request, "shop/cart.html", {"items": items, "total": total})
 
 
+@login_required
 def checkout(request):
     items, total = cart_items(request)
     if not items:
@@ -75,6 +84,7 @@ def checkout(request):
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
             order = form.save(commit=False)
+            order.customer = request.user
             order.total_price = total
             order.save()
             OrderItem.objects.bulk_create([OrderItem(order=order, product=i["product"], quantity=i["quantity"], price_at_purchase=i["product"].price) for i in items])
@@ -82,6 +92,13 @@ def checkout(request):
         messages.success(request, "Sifarişiniz qəbul edildi. Tezliklə sizinlə əlaqə saxlayacağıq.")
         return redirect("shop:product_list")
     return render(request, "shop/checkout.html", {"items": items, "total": total, "form": form})
+
+
+@login_required
+def profile(request):
+    orders = request.user.orders.prefetch_related("orderitem_set__product")
+    purchases = orders.filter(status=Order.Status.COMPLETED, payment_status=Order.PaymentStatus.PAID)
+    return render(request, "shop/profile.html", {"orders": orders, "purchases": purchases})
 
 
 def contact(request):

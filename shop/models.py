@@ -1,4 +1,5 @@
 from django.core.validators import MinValueValidator
+from django.conf import settings
 from django.db import models
 
 
@@ -26,9 +27,22 @@ class Order(models.Model):
         READY = "ready", "Təhvil almağa hazırdır"
         COMPLETED = "completed", "Tamamlandı"
         CANCELLED = "cancelled", "Ləğv edildi"
-    first_name = models.CharField("Ad", max_length=80)
-    last_name = models.CharField("Soyad", max_length=80)
+    class DeliveryMethod(models.TextChoices):
+        PICKUP = "pickup", "Özüm götürəcəyəm"
+        PAID_TAXI = "paid_taxi", "Ödənişli taksi ilə göndərilsin"
+        FREE_DELIVERY = "free_delivery", "Pulsuz 1-2 günə çatdırılma"
+
+    class PaymentStatus(models.TextChoices):
+        UNPAID = "unpaid", "Ödənilməyib"
+        PAID = "paid", "Ödənilib"
+
+    customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, verbose_name="Mağaza istifadəçisi", related_name="orders", null=True, blank=True)
+    # Köhnə sifariş qeydlərini qorumaq üçün saxlanılır; yeni sifarişlər istifadəçi hesabına bağlanır.
+    first_name = models.CharField("Ad", max_length=80, blank=True)
+    last_name = models.CharField("Soyad", max_length=80, blank=True)
     phone_number = models.CharField("Telefon nömrəsi", max_length=30)
+    delivery_method = models.CharField("Çatdırılma üsulu", max_length=20, choices=DeliveryMethod.choices, default=DeliveryMethod.PICKUP)
+    payment_status = models.CharField("Ödəniş statusu", max_length=10, choices=PaymentStatus.choices, default=PaymentStatus.UNPAID)
     total_price = models.DecimalField("Ümumi məbləğ", max_digits=10, decimal_places=2)
     status = models.CharField("Status", max_length=15, choices=Status.choices, default=Status.PENDING)
     created_at = models.DateTimeField("Sifariş tarixi", auto_now_add=True)
@@ -38,7 +52,7 @@ class Order(models.Model):
         verbose_name_plural = "Sifarişlər"
         ordering = ["-created_at"]
 
-    def __str__(self): return f"#{self.pk} — {self.first_name} {self.last_name}"
+    def __str__(self): return f"#{self.pk} — {self.customer}"
 
 
 class OrderItem(models.Model):

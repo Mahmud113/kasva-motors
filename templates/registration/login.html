@@ -1,0 +1,3 @@
+{% extends 'base.html' %}
+{% block title %}Daxil ol — Kasva Motors{% endblock %}
+{% block content %}<section class="page auth-page"><form class="checkout-form auth-form" method="post">{% csrf_token %}<h1>Daxil ol</h1><p>Mağaza hesabınızla daxil olun. Yeni hesablar yalnız admin tərəfindən yaradılır.</p>{% if form.non_field_errors %}<div class="error">{{ form.non_field_errors }}</div>{% endif %}<label>İstifadəçi adı{{ form.username }}</label><label>Şifrə{{ form.password }}</label><input type="hidden" name="next" value="{{ next }}"><button class="primary" type="submit">Daxil ol</button></form></section>{% endblock %}
