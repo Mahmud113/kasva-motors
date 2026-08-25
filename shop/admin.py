@@ -19,17 +19,17 @@ admin.site.unregister(User)
 class StoreUserAdmin(UserAdmin):
     fieldsets = (
         (None, {"fields": ("username", "password")}),
-        ("Şəxsi məlumatlar", {"fields": ("first_name", "last_name", "email")}),
+        ("Əlaqə məlumatları", {"fields": ("email",)}),
         ("Hesab statusu", {"fields": ("is_active", "is_staff", "is_superuser")}),
         ("Vacib tarixlər", {"fields": ("last_login", "date_joined")}),
     )
     add_fieldsets = (
         (None, {"classes": ("wide",), "fields": ("username", "password1", "password2")}),
-        ("Şəxsi məlumatlar", {"fields": ("first_name", "last_name", "email")}),
+        ("Əlaqə məlumatları", {"fields": ("email",)}),
         ("Hesab statusu", {"fields": ("is_active", "is_staff")}),
     )
 
-    list_display = ("username", "first_name", "last_name", "email", "store_address", "is_active", "is_staff")
+    list_display = ("username", "store_phone_number", "store_address", "email", "is_active", "is_staff")
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("store_profile")
@@ -38,13 +38,17 @@ class StoreUserAdmin(UserAdmin):
     def store_address(self, obj):
         return getattr(obj.store_profile, "address", "")
 
+    @admin.display(description="Telefon nömrəsi")
+    def store_phone_number(self, obj):
+        return getattr(obj.store_profile, "phone_number", "")
+
 
 class StoreProfileInline(admin.StackedInline):
     model = StoreProfile
     extra = 1
     max_num = 1
     can_delete = False
-    fields = ("address",)
+    fields = ("phone_number", "address")
 
 
 StoreUserAdmin.inlines = (StoreProfileInline,)

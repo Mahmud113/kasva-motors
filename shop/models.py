@@ -24,6 +24,7 @@ class Product(models.Model):
 class StoreProfile(models.Model):
     """Business details kept alongside Django's built-in user model."""
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="store_profile", verbose_name="İstifadəçi")
+    phone_number = models.CharField("Telefon nömrəsi", max_length=30, blank=True)
     address = models.TextField("Ünvan", blank=True)
 
     class Meta:

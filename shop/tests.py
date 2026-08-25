@@ -38,8 +38,9 @@ class StorefrontTests(TestCase):
         self.assertNotIn(Group, admin.site._registry)
 
     def test_store_address_is_saved_with_the_user_profile(self):
-        profile = StoreProfile.objects.create(user=self.user, address="Bakı şəhəri, Nərimanov rayonu")
+        profile = StoreProfile.objects.create(user=self.user, phone_number="+994 55 000 00 00", address="Bakı şəhəri, Nərimanov rayonu")
         self.assertEqual(profile.user.store_profile.address, "Bakı şəhəri, Nərimanov rayonu")
+        self.assertEqual(profile.user.store_profile.phone_number, "+994 55 000 00 00")
 
     def test_cart_can_add_product(self):
         self.client.force_login(self.user)
