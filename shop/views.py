@@ -89,10 +89,13 @@ def cart_update(request, product_id):
         if not isinstance(cart, dict):
             cart = {}
         key = str(product_id)
-        try:
-            quantity = int(request.POST.get("quantity", 0))
-        except (TypeError, ValueError):
+        if request.POST.get("remove"):
             quantity = 0
+        else:
+            try:
+                quantity = int(request.POST.get("quantity", 0))
+            except (TypeError, ValueError):
+                quantity = 0
         product = Product.objects.filter(pk=product_id, is_available=True).first()
         if quantity > 0 and product and product.quantity > 0:
             if quantity > product.quantity:

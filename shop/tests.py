@@ -78,6 +78,13 @@ class StorefrontTests(TestCase):
         self.assertContains(response, "maksimum mövcud miqdara çatmısınız")
         self.assertEqual(self.client.session["cart"][str(self.product.id)], 10)
 
+    def test_product_can_be_removed_from_basket(self):
+        self.client.force_login(self.user)
+        self.client.post(reverse("shop:cart_add", args=[self.product.id]))
+        response = self.client.post(reverse("shop:cart_update", args=[self.product.id]), {"remove": "1"}, follow=True)
+        self.assertContains(response, "Səbətiniz hələ boşdur")
+        self.assertNotIn(str(self.product.id), self.client.session.get("cart", {}))
+
     def test_basket_confirmation_creates_order_and_clears_cart(self):
         self.client.force_login(self.user)
         self.client.post(reverse("shop:cart_add", args=[self.product.id]))

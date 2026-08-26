@@ -1,2 +1,3 @@
 .quantity-notice { display: block; margin-top: 5px; color: #9a6700; font-size: 12px; line-height: 1.35; }
 .message.warning { background: #fff3cd; color: #856404; }
+.remove-btn { margin-left: 10px; border: 0; background: none; color: #c63e12; font: inherit; font-size: 12px; font-weight: bold; cursor: pointer; }
