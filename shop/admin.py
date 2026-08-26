@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group, User
 from django.db.models import F, Sum
+from django.utils.html import format_html_join
 from .models import Order, OrderItem, Product, StoreProfile
 
 # Django-nun hazır istifadəçi idarəetmə səhifəsini saxlayırıq, sadəcə admin
@@ -84,8 +85,20 @@ class OrderAdmin(admin.ModelAdmin):
     list_filter = ("delivery_method", "payment_status", "status", "created_at")
     search_fields = ("customer__username", "customer__first_name", "customer__last_name", "phone_number")
     list_editable = ("payment_status", "status")
-    readonly_fields = ("customer", "phone_number", "delivery_method", "total_price", "created_at")
+    readonly_fields = ("customer", "phone_number", "delivery_method", "total_price", "created_at", "ordered_products")
     exclude = ("first_name", "last_name")
+    fields = ("customer", "phone_number", "delivery_method", "total_price", "payment_status", "status", "created_at", "ordered_products")
     inlines = (OrderItemInline,)
     @admin.display(description="Mağaza istifadəçisi", ordering="customer__username")
     def customer(self, obj): return (obj.customer.get_full_name() or obj.customer.username) if obj.customer else "Təyin edilməyib"
+
+    @admin.display(description="Sifariş edilən məhsullar")
+    def ordered_products(self, obj):
+        items = obj.orderitem_set.select_related("product").all()
+        if not items:
+            return "Bu sifarişdə məhsul yoxdur."
+        return format_html_join(
+            "<br>",
+            "{} × {} — {} ₼",
+            ((item.product.name, item.quantity, item.price_at_purchase) for item in items),
+        )

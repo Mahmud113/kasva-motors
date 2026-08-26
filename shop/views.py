@@ -73,7 +73,10 @@ def cart_add(request, product_id):
     if available_to_add <= 0:
         messages.error(request, f"{product.name} məhsulundan səbətdə əlavə edilə biləcək miqdar qalmayıb.")
         return redirect(request.POST.get("next") or "shop:cart_detail")
-    cart[key] = current_quantity + min(max(quantity, 1), available_to_add, 99)
+    requested_quantity = max(quantity, 1)
+    if requested_quantity > available_to_add:
+        messages.warning(request, f"{product.name} üçün maksimum mövcud miqdara çatmısınız.")
+    cart[key] = current_quantity + min(requested_quantity, available_to_add, 99)
     request.session["cart"] = cart
     messages.success(request, f"{product.name} səbətə əlavə edildi.")
     return redirect(request.POST.get("next") or "shop:cart_detail")
@@ -92,6 +95,8 @@ def cart_update(request, product_id):
             quantity = 0
         product = Product.objects.filter(pk=product_id, is_available=True).first()
         if quantity > 0 and product and product.quantity > 0:
+            if quantity > product.quantity:
+                messages.warning(request, f"{product.name} üçün maksimum mövcud miqdara çatmısınız.")
             cart[key] = min(quantity, product.quantity, 99)
         else:
             cart.pop(key, None)

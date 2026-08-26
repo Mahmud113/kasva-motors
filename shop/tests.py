@@ -53,11 +53,30 @@ class StorefrontTests(TestCase):
         self.assertContains(response, "Ümumi inventar dəyəri")
         self.assertContains(response, "59,70 AZN")
 
+    def test_order_admin_detail_shows_ordered_products(self):
+        self.client.force_login(self.user)
+        self.client.post(reverse("shop:cart_add", args=[self.product.id]))
+        self.client.post(reverse("shop:cart_detail"), {"delivery_method": "pickup"})
+        order = self.product.orderitem_set.get().order
+        admin_user = get_user_model().objects.create_superuser(username="admin", password="admin-password")
+        self.client.force_login(admin_user)
+        response = self.client.get(f"/admin/shop/order/{order.id}/change/")
+        self.assertContains(response, "Sifariş edilən məhsullar")
+        self.assertContains(response, "Yağ filtri")
+        self.assertContains(response, "× 1")
+
     def test_cart_can_add_product(self):
         self.client.force_login(self.user)
         response = self.client.post(reverse("shop:cart_add", args=[self.product.id]))
         self.assertRedirects(response, reverse("shop:cart_detail"))
         self.assertContains(self.client.get(reverse("shop:cart_detail")), "Yağ filtri")
+
+    def test_basket_quantity_is_limited_to_inventory(self):
+        self.client.force_login(self.user)
+        self.client.post(reverse("shop:cart_add", args=[self.product.id]))
+        response = self.client.post(reverse("shop:cart_update", args=[self.product.id]), {"quantity": 99}, follow=True)
+        self.assertContains(response, "maksimum mövcud miqdara çatmısınız")
+        self.assertEqual(self.client.session["cart"][str(self.product.id)], 10)
 
     def test_basket_confirmation_creates_order_and_clears_cart(self):
         self.client.force_login(self.user)
