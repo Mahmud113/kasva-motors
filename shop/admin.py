@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group, User
+from django.db.models import F, Sum
 from .models import Order, OrderItem, Product, StoreProfile
 
 # Django-nun hazır istifadəçi idarəetmə səhifəsini saxlayırıq, sadəcə admin
@@ -56,10 +57,18 @@ StoreUserAdmin.inlines = (StoreProfileInline,)
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ("name", "part_number", "category", "compatibility", "price", "is_available", "created_at")
+    list_display = ("name", "part_number", "category", "compatibility", "price", "quantity", "is_available", "created_at")
     list_filter = ("category", "compatibility", "is_available")
     search_fields = ("name", "part_number")
-    list_editable = ("price", "is_available")
+    list_editable = ("price", "quantity", "is_available")
+    change_list_template = "admin/shop/product/change_list.html"
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context["total_inventory"] = Product.objects.aggregate(
+            total=Sum(F("price") * F("quantity"), default=0)
+        )["total"]
+        return super().changelist_view(request, extra_context=extra_context)
 
 
 class OrderItemInline(admin.TabularInline):
@@ -76,6 +85,7 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ("customer__username", "customer__first_name", "customer__last_name", "phone_number")
     list_editable = ("payment_status", "status")
     readonly_fields = ("customer", "phone_number", "delivery_method", "total_price", "created_at")
+    exclude = ("first_name", "last_name")
     inlines = (OrderItemInline,)
     @admin.display(description="Mağaza istifadəçisi", ordering="customer__username")
     def customer(self, obj): return (obj.customer.get_full_name() or obj.customer.username) if obj.customer else "Təyin edilməyib"

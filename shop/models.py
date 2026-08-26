@@ -9,6 +9,7 @@ class Product(models.Model):
     category = models.CharField("Kateqoriya", max_length=100)
     compatibility = models.CharField("Avtomobil markası", max_length=120, blank=True)
     price = models.DecimalField("Qiymət", max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+    quantity = models.PositiveIntegerField("Miqdar", default=0)
     image_url = models.URLField("Şəkil ünvanı", blank=True)
     is_available = models.BooleanField("Mövcuddur", default=True)
     created_at = models.DateTimeField("Yaradılma tarixi", auto_now_add=True)

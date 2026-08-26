@@ -42,6 +42,15 @@ class StorefrontTests(TestCase):
         self.assertEqual(profile.user.store_profile.address, "Bakı şəhəri, Nərimanov rayonu")
         self.assertEqual(profile.user.store_profile.phone_number, "+994 55 000 00 00")
 
+    def test_product_admin_shows_total_inventory_value(self):
+        self.product.quantity = 3
+        self.product.save()
+        admin_user = get_user_model().objects.create_superuser(username="admin", password="admin-password")
+        self.client.force_login(admin_user)
+        response = self.client.get("/admin/shop/product/")
+        self.assertContains(response, "Ümumi inventar dəyəri")
+        self.assertContains(response, "59,70 AZN")
+
     def test_cart_can_add_product(self):
         self.client.force_login(self.user)
         response = self.client.post(reverse("shop:cart_add", args=[self.product.id]))
