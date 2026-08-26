@@ -4,12 +4,18 @@ from django.db import models
 
 
 class Product(models.Model):
+    class StockLevel(models.TextChoices):
+        HIGH = "high", "Çox"
+        MEDIUM = "medium", "Orta"
+        LOW = "low", "Az"
+
     name = models.CharField("Ad", max_length=180)
     part_number = models.CharField("Hissə nömrəsi", max_length=80, unique=True)
     category = models.CharField("Kateqoriya", max_length=100)
     compatibility = models.CharField("Avtomobil markası", max_length=120, blank=True)
     price = models.DecimalField("Qiymət", max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     quantity = models.PositiveIntegerField("Miqdar", default=0)
+    stock_level = models.CharField("İstifadəçi üçün miqdar", max_length=6, choices=StockLevel.choices, default=StockLevel.MEDIUM)
     image_url = models.URLField("Şəkil ünvanı", blank=True)
     is_available = models.BooleanField("Mövcuddur", default=True)
     created_at = models.DateTimeField("Yaradılma tarixi", auto_now_add=True)

@@ -14,7 +14,7 @@ class StorefrontTests(TestCase):
         self.user = get_user_model().objects.create_user(username="magaza1", password="guclu-sifre")
         self.product = Product.objects.create(
             name="Yağ filtri", part_number="OF-123", category="Filtrlər",
-            price=Decimal("19.90"), is_available=True,
+            price=Decimal("19.90"), quantity=10, is_available=True,
         )
 
     def test_home_page_is_azerbaijani_and_lists_products(self):
@@ -22,6 +22,8 @@ class StorefrontTests(TestCase):
         self.assertContains(response, "Kasva Motors")
         self.assertContains(response, "Yağ filtri")
         self.assertContains(response, "Səbətə əlavə et")
+        self.assertContains(response, "Miqdar")
+        self.assertContains(response, "Orta")
         self.assertContains(response, "shop/images/kasva-motors-logo.png")
         self.assertContains(response, "product-search-data")
         self.assertContains(response, "shop/search.js")
@@ -67,6 +69,8 @@ class StorefrontTests(TestCase):
         order = self.product.orderitem_set.get().order
         self.assertEqual(order.customer, self.user)
         self.assertEqual(order.delivery_method, "pickup")
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.quantity, 9)
 
     def test_login_is_required_to_add_to_cart(self):
         response = self.client.post(reverse("shop:cart_add", args=[self.product.id]))

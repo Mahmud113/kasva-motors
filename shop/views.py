@@ -43,10 +43,10 @@ def cart_items(request):
         if product_id > 0 and quantity > 0:
             product_ids.append(product_id)
             quantities[product_id] = min(quantity, 99)
-    products = Product.objects.filter(id__in=product_ids, is_available=True)
+    products = Product.objects.filter(id__in=product_ids, is_available=True, quantity__gt=0)
     items, total = [], Decimal("0")
     for product in products:
-        quantity = quantities[product.id]
+        quantity = min(quantities[product.id], product.quantity)
         subtotal = product.price * quantity
         items.append({"product": product, "quantity": quantity, "subtotal": subtotal})
         total += subtotal
@@ -65,7 +65,15 @@ def cart_add(request, product_id):
         quantity = int(request.POST.get("quantity", 1))
     except (TypeError, ValueError):
         quantity = 1
-    cart[key] = min(int(cart.get(key, 0)) + max(quantity, 1), 99)
+    try:
+        current_quantity = int(cart.get(key, 0))
+    except (TypeError, ValueError):
+        current_quantity = 0
+    available_to_add = product.quantity - current_quantity
+    if available_to_add <= 0:
+        messages.error(request, f"{product.name} məhsulundan səbətdə əlavə edilə biləcək miqdar qalmayıb.")
+        return redirect(request.POST.get("next") or "shop:cart_detail")
+    cart[key] = current_quantity + min(max(quantity, 1), available_to_add, 99)
     request.session["cart"] = cart
     messages.success(request, f"{product.name} səbətə əlavə edildi.")
     return redirect(request.POST.get("next") or "shop:cart_detail")
@@ -82,8 +90,11 @@ def cart_update(request, product_id):
             quantity = int(request.POST.get("quantity", 0))
         except (TypeError, ValueError):
             quantity = 0
-        if quantity > 0: cart[key] = min(quantity, 99)
-        else: cart.pop(key, None)
+        product = Product.objects.filter(pk=product_id, is_available=True).first()
+        if quantity > 0 and product and product.quantity > 0:
+            cart[key] = min(quantity, product.quantity, 99)
+        else:
+            cart.pop(key, None)
         request.session["cart"] = cart
     return redirect("shop:cart_detail")
 
@@ -99,11 +110,25 @@ def cart_detail(request):
     form = CheckoutForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
+            locked_products = {
+                product.id: product
+                for product in Product.objects.select_for_update().filter(id__in=[item["product"].id for item in items])
+            }
+            for item in items:
+                product = locked_products.get(item["product"].id)
+                if not product or not product.is_available or product.quantity < item["quantity"]:
+                    messages.error(request, f"{item['product'].name} üçün kifayət qədər stok yoxdur. Səbətinizi yeniləyin.")
+                    return redirect("shop:cart_detail")
             order = form.save(commit=False)
             order.customer = request.user
             order.total_price = total
             order.save()
-            OrderItem.objects.bulk_create([OrderItem(order=order, product=i["product"], quantity=i["quantity"], price_at_purchase=i["product"].price) for i in items])
+            OrderItem.objects.bulk_create([OrderItem(order=order, product=locked_products[i["product"].id], quantity=i["quantity"], price_at_purchase=i["product"].price) for i in items])
+            for item in items:
+                product = locked_products[item["product"].id]
+                product.quantity -= item["quantity"]
+                product.is_available = product.quantity > 0
+                product.save(update_fields=("quantity", "is_available"))
         request.session.pop("cart", None)
         messages.success(request, "Sifarişiniz qəbul edildi. Tezliklə sizinlə əlaqə saxlayacağıq.")
         return redirect("shop:product_list")

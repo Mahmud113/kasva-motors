@@ -57,10 +57,10 @@ StoreUserAdmin.inlines = (StoreProfileInline,)
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ("name", "part_number", "category", "compatibility", "price", "quantity", "is_available", "created_at")
+    list_display = ("name", "part_number", "category", "compatibility", "price", "quantity", "stock_level", "is_available", "created_at")
     list_filter = ("category", "compatibility", "is_available")
     search_fields = ("name", "part_number")
-    list_editable = ("price", "quantity", "is_available")
+    list_editable = ("price", "quantity", "stock_level", "is_available")
     change_list_template = "admin/shop/product/change_list.html"
 
     def changelist_view(self, request, extra_context=None):
