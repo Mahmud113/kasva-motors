@@ -9,14 +9,13 @@ class Product(models.Model):
         MEDIUM = "medium", "Orta"
         LOW = "low", "Az"
 
-    name = models.CharField("Ad", max_length=180)
-    part_number = models.CharField("Hissə nömrəsi", max_length=80, unique=True)
-    category = models.CharField("Kateqoriya", max_length=100)
-    compatibility = models.CharField("Avtomobil markası", max_length=120, blank=True)
+    product_name = models.CharField("Məhsul", max_length=180)
+    product_code = models.CharField("Məhsul kodu", max_length=80)
+    brand_name = models.CharField("Brend", max_length=120)
+    brand_code = models.CharField("Brend kodu", max_length=80)
     price = models.DecimalField("Qiymət", max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     quantity = models.PositiveIntegerField("Miqdar", default=0)
-    stock_level = models.CharField("İstifadəçi üçün miqdar", max_length=6, choices=StockLevel.choices, default=StockLevel.MEDIUM)
-    image_url = models.URLField("Şəkil ünvanı", blank=True)
+    stock_level = models.CharField("Stok səviyyəsi", max_length=6, choices=StockLevel.choices, default=StockLevel.HIGH)
     is_available = models.BooleanField("Mövcuddur", default=True)
     created_at = models.DateTimeField("Yaradılma tarixi", auto_now_add=True)
 
@@ -25,7 +24,7 @@ class Product(models.Model):
         verbose_name_plural = "Məhsullar"
         ordering = ["-created_at"]
 
-    def __str__(self): return f"{self.name} ({self.part_number})"
+    def __str__(self): return f"{self.product_name} ({self.product_code})"
 
 
 class StoreProfile(models.Model):

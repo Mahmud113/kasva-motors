@@ -7,7 +7,7 @@
   const products = JSON.parse(data.textContent);
   const render = () => {
     const query = input.value.trim().toLocaleLowerCase("az");
-    const matches = products.filter((product) => `${product.name} ${product.part_number}`.toLocaleLowerCase("az").includes(query)).slice(0, 12);
+    const matches = products.filter((product) => `${product.product_name} ${product.product_code} ${product.brand_name} ${product.brand_code}`.toLocaleLowerCase("az").includes(query)).slice(0, 12);
     panel.replaceChildren();
     if (!matches.length) {
       panel.innerHTML = '<div class="search-empty">Uyğun məhsul tapılmadı.</div>';
@@ -15,10 +15,10 @@
       matches.forEach((product) => {
         const item = document.createElement("a");
         item.className = "search-suggestion";
-        item.href = `/?q=${encodeURIComponent(product.part_number)}`;
+        item.href = `/?q=${encodeURIComponent(product.product_code)}`;
         item.innerHTML = `<span><strong></strong><small></small></span><em></em>`;
-        item.querySelector("strong").textContent = product.name;
-        item.querySelector("small").textContent = `ID: ${product.id} · Kod: ${product.part_number}`;
+        item.querySelector("strong").textContent = product.product_name;
+        item.querySelector("small").textContent = `Kod: ${product.product_code} · Brend: ${product.brand_name}`;
         const stock = item.querySelector("em");
         stock.textContent = product.is_available ? "Mövcuddur" : "Mövcud deyil";
         if (!product.is_available) stock.classList.add("off");

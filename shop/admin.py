@@ -58,9 +58,9 @@ StoreUserAdmin.inlines = (StoreProfileInline,)
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ("name", "part_number", "category", "compatibility", "price", "quantity", "stock_level", "is_available", "created_at")
-    list_filter = ("category", "compatibility", "is_available")
-    search_fields = ("name", "part_number")
+    list_display = ("product_name", "product_code", "brand_name", "brand_code", "price", "quantity", "stock_level", "is_available", "created_at")
+    list_filter = ("brand_name", "is_available", "stock_level")
+    search_fields = ("product_name", "product_code", "brand_name", "brand_code")
     list_editable = ("price", "quantity", "stock_level", "is_available")
     change_list_template = "admin/shop/product/change_list.html"
 
@@ -100,5 +100,5 @@ class OrderAdmin(admin.ModelAdmin):
         return format_html_join(
             "<br>",
             "{} × {} — {} ₼",
-            ((item.product.name, item.quantity, item.price_at_purchase) for item in items),
+            ((item.product.product_name, item.quantity, item.price_at_purchase) for item in items),
         )

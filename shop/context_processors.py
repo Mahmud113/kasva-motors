@@ -17,5 +17,5 @@ def cart_count(request):
 def search_products(request):
     """Product data for the home-page search suggestions only."""
     if request.resolver_match and request.resolver_match.view_name == "shop:product_list":
-        return {"search_products": list(Product.objects.values("id", "name", "part_number", "is_available"))}
+        return {"search_products": list(Product.objects.values("id", "product_name", "product_code", "brand_name", "brand_code", "is_available"))}
     return {"search_products": []}

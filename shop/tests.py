@@ -13,7 +13,7 @@ class StorefrontTests(TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="magaza1", password="guclu-sifre")
         self.product = Product.objects.create(
-            name="Yağ filtri", part_number="OF-123", category="Filtrlər",
+            product_name="Yağ filtri", product_code="OF-123", brand_name="Mann", brand_code="MN-01",
             price=Decimal("19.90"), quantity=10, is_available=True,
         )
 
@@ -23,18 +23,17 @@ class StorefrontTests(TestCase):
         self.assertContains(response, "Yağ filtri")
         self.assertContains(response, "Səbətə əlavə et")
         self.assertContains(response, "Miqdar")
-        self.assertContains(response, "Orta")
+        self.assertContains(response, "Çox")
         self.assertContains(response, "shop/images/kasva-motors-logo.png")
         self.assertContains(response, "product-search-data")
         self.assertContains(response, "shop/search.js")
 
-    def test_product_image_button_only_appears_when_an_image_exists(self):
+    def test_product_list_shows_the_new_product_and_brand_fields_without_images(self):
         response = self.client.get(reverse("shop:product_list"))
+        self.assertContains(response, "Mann")
+        self.assertContains(response, "MN-01")
         self.assertNotContains(response, "data-product-image")
-        self.product.image_url = "https://example.com/product.jpg"
-        self.product.save()
-        response = self.client.get(reverse("shop:product_list"))
-        self.assertContains(response, "data-product-image")
+        self.assertNotContains(response, "product-images.js")
 
     def test_groups_are_not_registered_in_the_admin(self):
         self.assertNotIn(Group, admin.site._registry)

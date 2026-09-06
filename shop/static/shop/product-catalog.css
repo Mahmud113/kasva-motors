@@ -1,0 +1,5 @@
+@media (min-width: 801px) {
+  .product-row {
+    grid-template-columns: 55px minmax(150px, 2fr) minmax(100px, 1fr) minmax(100px, 1fr) minmax(100px, 1fr) 100px 80px 145px;
+  }
+}
