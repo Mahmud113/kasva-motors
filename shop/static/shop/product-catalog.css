@@ -1,4 +1,37 @@
 @media (min-width: 801px) {
+  .catalog {
+    display: block;
+  }
+
+  .catalog > aside {
+    display: flex;
+    align-items: end;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  .catalog > aside h2 {
+    margin: 0 0 9px;
+  }
+
+  .catalog > aside form {
+    display: flex;
+    flex: 1;
+    align-items: end;
+    gap: 14px;
+  }
+
+  .catalog > aside label {
+    flex: 1;
+    margin-top: 0;
+  }
+
+  .catalog > aside .filter-btn {
+    width: auto;
+    min-width: 110px;
+    margin-top: 0;
+  }
+
   .product-row {
     grid-template-columns: 55px minmax(150px, 2fr) minmax(100px, 1fr) minmax(100px, 1fr) minmax(100px, 1fr) 100px 80px 145px;
   }

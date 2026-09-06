@@ -70,6 +70,14 @@ class StorefrontTests(TestCase):
         self.assertRedirects(response, reverse("shop:cart_detail"))
         self.assertContains(self.client.get(reverse("shop:cart_detail")), "Yağ filtri")
 
+    def test_cart_badge_excludes_stale_or_unavailable_products(self):
+        self.client.force_login(self.user)
+        session = self.client.session
+        session["cart"] = {str(self.product.id): 2, "999999": 16}
+        session.save()
+        response = self.client.get(reverse("shop:product_list"))
+        self.assertContains(response, "Səbət <b>2</b>", html=True)
+
     def test_basket_quantity_is_limited_to_inventory(self):
         self.client.force_login(self.user)
         self.client.post(reverse("shop:cart_add", args=[self.product.id]))
