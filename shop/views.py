@@ -28,7 +28,9 @@ def product_list(request):
     products = products.order_by(orderings.get(sort, "-created_at"))
     return render(request, "shop/product_list.html", {
         "products": products,
-        "brands": Product.objects.values_list("brand_name", flat=True).distinct(),
+        # Explicit ordering prevents Product.Meta.ordering (created_at) from
+        # being included in the DISTINCT query and duplicating brand options.
+        "brands": Product.objects.order_by("brand_name").values_list("brand_name", flat=True).distinct(),
     })
 
 

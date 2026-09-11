@@ -35,6 +35,16 @@ class StorefrontTests(TestCase):
         self.assertNotContains(response, "data-product-image")
         self.assertNotContains(response, "product-images.js")
 
+    def test_brand_filter_lists_each_brand_only_once(self):
+        Product.objects.create(
+            product_name="Hava filtri", product_code="AF-456", brand_name="Mann", brand_code="MN-02",
+            price=Decimal("24.50"), quantity=5, is_available=True,
+        )
+
+        response = self.client.get(reverse("shop:product_list"))
+
+        self.assertContains(response, '<option value="Mann"', count=1)
+
     def test_groups_are_not_registered_in_the_admin(self):
         self.assertNotIn(Group, admin.site._registry)
 
